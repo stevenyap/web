@@ -1,8 +1,8 @@
 import { State } from "./State"
 
 const View: React.FC<{ state: State }> = ({ state }) => {
-  const { login } = state.publicState
-  return <div>Hello {login}!</div>
+  const { route } = state.publicState
+  return <div>Hello {route._t}!</div>
 }
 
 export default View

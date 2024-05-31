@@ -1,17 +1,5 @@
-import { Action } from "./Action"
-import { Cmd } from "./Program"
-
-export function init(): [State, Cmd] {
-  const publicState: PublicState = { login: "Iker" }
-  return [{ _t: "Public", publicState }, []]
-}
-
-export function update(state: State, action: Action): [State, Cmd] {
-  switch (action._t) {
-    case "OnUrlChange":
-      return [state, []]
-  }
-}
+import type { Action, Cmd } from "./Action"
+import { Route, toRoute } from "./Route"
 
 export type State =
   | {
@@ -24,9 +12,25 @@ export type State =
     }
 
 export type PublicState = {
-  login: string
+  route: Route
 }
 
 export type AuthState = {
   login: string
+}
+
+export function init(): [State, Cmd] {
+  const publicState: PublicState = { route: toRoute(window.location.href) }
+  return [{ _t: "Public", publicState }, []]
+}
+
+export function update(state: State, action: Action): [State, Cmd] {
+  return action(state)
+}
+
+export function _PublicState(
+  s: State,
+  publicState: Partial<PublicState>,
+): State {
+  return { ...s, publicState: { ...s.publicState, ...publicState } }
 }

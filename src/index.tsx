@@ -1,12 +1,12 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
 import "normalize.css"
-import { emit } from "./Program"
 import { State, init, update } from "./State"
 import * as Program from "./Program"
 import View from "./View"
+import { onUrlChange } from "./Action"
 
-window.onpopstate = () => emit({ _t: "OnUrlChange" })
+window.onpopstate = () => Program.emit(onUrlChange)
 
 const rootElement = document.getElementById("app")
 if (rootElement == null) {

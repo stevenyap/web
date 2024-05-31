@@ -1,5 +1,5 @@
-import type { State } from "./State"
-import type { Action } from "./Action"
+import { State } from "./State"
+import { Action, Cmd } from "./Action"
 import { flushSync } from "react-dom"
 
 // Fundamental:
@@ -18,7 +18,6 @@ import { flushSync } from "react-dom"
 // - Which will show an error message in browser
 // - BUT the state is still update base on that emit Action
 
-export type Cmd = Array<Promise<Action | null>>
 export type Program = {
   update: (state: State, action: Action) => [State, Cmd]
   render: (state: State) => void
