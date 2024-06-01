@@ -1,5 +1,5 @@
-import { State } from "./State"
-import { Action, Cmd } from "./Action"
+import type { State } from "./State"
+import type { Action, Cmd } from "./Action"
 import { flushSync } from "react-dom"
 
 // Fundamental:
