@@ -1,12 +1,12 @@
-import React from "react"
-import { createRoot } from "react-dom/client"
 import "normalize.css"
-import { State, init, update } from "./State"
-import * as Program from "./Program"
+import React from "react"
+import { flushSync } from "react-dom"
+import { createRoot } from "react-dom/client"
+import { State, init } from "./State"
+import * as Runtime from "./Runtime"
 import View from "./View"
 import { onUrlChange } from "./Action"
-
-window.onpopstate = () => Program.emit(onUrlChange)
+import { setEmit } from "./emit"
 
 const rootElement = document.getElementById("app")
 if (rootElement == null) {
@@ -14,16 +14,21 @@ if (rootElement == null) {
 }
 const root = createRoot(rootElement)
 function render(state: State): void {
-  root.render(
-    <React.StrictMode>
-      <View state={state} />
-    </React.StrictMode>,
-  )
+  // React does batch rendering instead of rendering synchronously
+  // Hence we force React to render synchronously here on every state update
+  flushSync(() => {
+    root.render(
+      <React.StrictMode>
+        <View state={state} />
+      </React.StrictMode>,
+    )
+  })
 }
 
-function runProgram(): void {
-  const [initState, initCmd] = init()
-  Program.run(initState, initCmd, { update, render })
-}
+// Export out the emit function
+const [initState, initCmd] = init()
+export const emit = Runtime.start(initState, initCmd, render)
+setEmit(emit)
 
-runProgram()
+// Subscriptions
+window.onpopstate = () => emit(onUrlChange)
