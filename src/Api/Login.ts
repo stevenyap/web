@@ -1,4 +1,4 @@
-import { publicApi, ApiResponse, apiErrorString, ApiError } from "../Api"
+import { ApiResponse, apiErrorString, ApiError, postApi } from "../Api"
 import {
   contract,
   ErrorCode,
@@ -10,7 +10,7 @@ export type { ErrorCode, Payload }
 export type Response = ApiResponse<ErrorCode, Payload>
 
 export function call(params: BodyParams): Promise<Response> {
-  return publicApi(contract, {}, params)
+  return postApi(contract, {}, params)
 }
 
 export function errorString(code: ApiError<ErrorCode>): string {

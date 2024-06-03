@@ -1,5 +1,5 @@
 import * as JD from "decoders"
-import { parse } from "teki"
+import * as Teki from "teki"
 import {
   PositiveInt,
   createPositiveInt,
@@ -14,35 +14,32 @@ export type Route =
   | { _t: "User"; userID: PositiveInt }
   | { _t: "NotFound" }
 
-type ParserDecoder = [string[], JD.Decoder<Route>]
-
-const allParsers: ParserDecoder[] = [
-  [
-    ["/", "/#:_"],
-    JD.object({
-      _t: JD.always("Home"),
-    }),
-  ],
-  [
-    ["/login", "/login/#:_"],
-    JD.object({
-      _t: JD.always("Login"),
-    }),
-  ],
-  [
-    ["/user/:userID", "/user/:userID/#:_"],
-    JD.object({
+const Router: Record<Route["_t"], RouteDecoder> = {
+  Home: {
+    urls: ["/", "/#:_"],
+    decoder: JD.always({ _t: "Home" }),
+  },
+  NotFound: {
+    urls: ["/not-found", "/not-found/#:_"],
+    decoder: JD.always({ _t: "NotFound" }),
+  },
+  Login: {
+    urls: ["/login", "/login/#:_"],
+    decoder: JD.always({ _t: "Login" }),
+  },
+  User: {
+    urls: ["/user/:userID", "/user/:userID/#:_"],
+    decoder: JD.object({
       _t: JD.always("User"),
       userID: stringNumberDecoder.transform(positiveIntDecoder.verify),
     }),
-  ],
-  [
-    ["/not-found", "/not-found/#:_"],
-    JD.object({
-      _t: JD.always("NotFound"),
-    }),
-  ],
-]
+  },
+}
+
+type RouteDecoder = {
+  urls: string[]
+  decoder: JD.Decoder<Route>
+}
 
 export function toUrl(route: Route): string {
   switch (route._t) {
@@ -58,19 +55,20 @@ export function toUrl(route: Route): string {
 }
 
 export function toRoute(url: string): Route {
-  return toRoute_(url, allParsers)
+  return toRoute_(url, Object.values(Router))
 }
 
-function toRoute_(url: string, allParsers: ParserDecoder[]): Route {
-  const [current, ...rest] = allParsers
+function toRoute_(url: string, routeDecoders: RouteDecoder[]): Route {
+  const [current, ...rest] = routeDecoders
   if (current == null) return { _t: "NotFound" }
-  const [patterns, decoder] = current
+  const { urls, decoder } = current
 
-  const route = patterns.reduce(
-    (a: null | Route, pattern: string) =>
-      a != null ? a : decoder.value(parse(pattern)(url)) || null,
-    null,
-  )
+  const route = urls.reduce((route: Route | null, url_: string) => {
+    if (route != null) return route
+
+    const parseResult = Teki.parse(url_)(url)
+    return parseResult == null ? null : decoder.value(parseResult) || null
+  }, null)
 
   return route != null ? route : toRoute_(url, rest)
 }
@@ -111,7 +109,18 @@ export function _test(): void {
   for (const [u, r] of urls) {
     const route = toRoute(u)
     if (r._t != route._t) {
-      console.info(u, JSON.stringify(r), JSON.stringify(route))
+      console.error(u, JSON.stringify(r), JSON.stringify(route))
     }
+  }
+
+  const routes: Route[] = [
+    { _t: "Home" },
+    { _t: "Login" },
+    { _t: "User", userID },
+    { _t: "NotFound" },
+  ]
+
+  for (const route of routes) {
+    console.info(route._t, toUrl(route))
   }
 }

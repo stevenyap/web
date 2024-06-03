@@ -9,7 +9,19 @@ import {
 } from "./Data/Request"
 import {
   AuthApi,
+  AuthDeleteApi,
+  AuthGetApi,
+  AuthNoneBodyApi,
+  AuthPatchApi,
+  AuthPostApi,
+  AuthPutApi,
+  DeleteApi,
+  GetApi,
+  PatchApi,
+  PostApi,
   PublicApi,
+  PublicNoneBodyApi,
+  PutApi,
   ResponseJson,
   UrlRecord,
 } from "../../core/data/Api"
@@ -37,28 +49,99 @@ export function getErrorCode<E>(error: ApiError<E>): E | null {
       return error
   }
 }
+export function getApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  contract: GetApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return publicNoneBodyApi(contract, urlData)
+}
 
-export function publicApi<
+export function deleteApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  contract: DeleteApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return publicNoneBodyApi(contract, urlData)
+}
+
+export function postApi<
   Route extends string,
   UrlParams extends UrlRecord<Route>,
   RequestBody,
   ErrorCode,
   Payload,
 >(
-  contract: PublicApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  contract: PostApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
   urlData: UrlParams,
   bodyData: RequestBody,
 ): Promise<ApiResponse<ErrorCode, Payload>> {
-  const { method, route, responseDecoder } = contract
-  const path = Teki.reverse(route)(toStringRecord(urlData))
-  return request(makePath(path), {
-    method,
-    headers: getHeaders(),
-    body: JSON.stringify(bodyData),
-  }).then(handleRequest(responseDecoder))
+  return publicApi(contract, urlData, bodyData)
 }
 
-export async function authApi<
+export function putApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  RequestBody,
+  ErrorCode,
+  Payload,
+>(
+  contract: PutApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: RequestBody,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return publicApi(contract, urlData, bodyData)
+}
+
+export function patchApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  RequestBody,
+  ErrorCode,
+  Payload,
+>(
+  contract: PatchApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: RequestBody,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return publicApi(contract, urlData, bodyData)
+}
+
+export function authGetApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthGetApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return authNoneBodyApi(token, contract, urlData)
+}
+
+export function authDeleteApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthDeleteApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return authNoneBodyApi(token, contract, urlData)
+}
+
+export function authPostApi<
   Route extends string,
   UrlParams extends UrlRecord<Route>,
   RequestBody,
@@ -66,34 +149,41 @@ export async function authApi<
   Payload,
 >(
   token: string,
-  contract: AuthApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  contract: AuthPostApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
   urlData: UrlParams,
   bodyData: RequestBody,
 ): Promise<ApiResponse<ErrorCode, Payload>> {
-  const { method, route, responseDecoder } = contract
-  const path = Teki.reverse(route)(toStringRecord(urlData))
-
-  return request(makePath(path), {
-    method,
-    headers: getAuthHeaders(token),
-    body: JSON.stringify(bodyData),
-  }).then(handleRequest(responseDecoder))
+  return authApi(token, contract, urlData, bodyData)
 }
 
-export function toStringRecord<R extends string>(
-  urlData: UrlRecord<R>,
-): Record<string, string> {
-  return Object.entries(urlData).reduce(
-    (acc: Record<string, string>, [key, value]) => {
-      acc[key] = String(value)
-      return acc
-    },
-    {},
-  )
+export function authPutApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  RequestBody,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthPutApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: RequestBody,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return authApi(token, contract, urlData, bodyData)
 }
 
-export function makePath(endpoint: string): string {
-  return `${location.protocol}//${Env.API_HOST}${endpoint}`
+export function authPatchApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  RequestBody,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthPatchApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: RequestBody,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  return authApi(token, contract, urlData, bodyData)
 }
 
 export function apiErrorString<E>(
@@ -117,6 +207,100 @@ export function apiErrorString<E>(
 }
 
 // Internal
+
+async function publicApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  RequestBody,
+  ErrorCode,
+  Payload,
+>(
+  contract: PublicApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: RequestBody,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  const { method, route, responseDecoder } = contract
+  const path = Teki.reverse(route)(toStringRecord(urlData))
+  return request(makePath(path), {
+    method,
+    headers: getHeaders(),
+    body: JSON.stringify(bodyData),
+  }).then(handleRequest(responseDecoder))
+}
+
+async function publicNoneBodyApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  contract: PublicNoneBodyApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  const { method, route, responseDecoder } = contract
+  const path = Teki.reverse(route)(toStringRecord(urlData))
+  return request(makePath(path), {
+    method,
+    headers: getHeaders(),
+  }).then(handleRequest(responseDecoder))
+}
+
+async function authApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  RequestBody,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: RequestBody,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  const { method, route, responseDecoder } = contract
+  const path = Teki.reverse(route)(toStringRecord(urlData))
+
+  return request(makePath(path), {
+    method,
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(bodyData),
+  }).then(handleRequest(responseDecoder))
+}
+
+async function authNoneBodyApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthNoneBodyApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  const { method, route, responseDecoder } = contract
+  const path = Teki.reverse(route)(toStringRecord(urlData))
+
+  return request(makePath(path), {
+    method,
+    headers: getAuthHeaders(token),
+  }).then(handleRequest(responseDecoder))
+}
+
+function toStringRecord<R extends string>(
+  urlData: UrlRecord<R>,
+): Record<string, string> {
+  return Object.entries(urlData).reduce(
+    (acc: Record<string, string>, [key, value]) => {
+      acc[key] = String(value)
+      return acc
+    },
+    {},
+  )
+}
+
+function makePath(endpoint: string): string {
+  return `${location.protocol}//${Env.API_HOST}${endpoint}`
+}
 
 function getHeaders(): Headers {
   const headers = new Headers()
