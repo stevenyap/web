@@ -4,11 +4,32 @@ import * as RemoteData from "../../core/data/RemoteData"
 import { createEmail } from "../../core/data/user/Email"
 import { fromMaybe } from "../../core/data/Maybe"
 import { createPassword } from "../../core/data/user/Password"
+import * as LocalStorage from "./Data/LocalStorage"
+import * as ApiProfile from "./Api/Profile"
 import * as ApiLogin from "./Api/Login"
 
 export type Cmd = Array<Promise<Action | null>>
 
 export type Action = (s: State) => [State, Cmd]
+
+export function init(): Cmd {
+  const token = LocalStorage.getToken()
+  return token != null
+    ? [ApiProfile.call(token).then((r) => profileResponse(token, r))]
+    : []
+}
+
+function profileResponse(token: string, response: ApiProfile.Response): Action {
+  return (state: State) => {
+    if (response._t === "Left") {
+      LocalStorage.removeToken()
+      return [{ _t: "Public", publicState: state.publicState }, []]
+    }
+
+    const authState = { token, user: response.value }
+    return [{ ...state, _t: "Auth", authState }, []]
+  }
+}
 
 export function onUrlChange(state: State): [State, Cmd] {
   return [
@@ -71,6 +92,7 @@ function loginResponse(response: ApiLogin.Response): Action {
     const { publicState } = _PublicState(state, {
       login: { ...login, data: RemoteData.notAsked() },
     })
+    LocalStorage.setToken(token)
 
     return [{ _t: "Auth", publicState, authState: { token, user } }, []]
   }

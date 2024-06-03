@@ -2,21 +2,22 @@ import { css } from "@emotion/css"
 import { body, buttons, breakpoint, colors, theme } from "../View/Theme"
 import { State } from "../State"
 import { loginSubmit, loginChangeEmail, loginChangePassword } from "../Action"
-import { emit } from "../Program"
+import { emit } from "../emit"
 import { createEmail } from "../../../core/data/user/Email"
 import { fromMaybe } from "../../../core/data/Maybe"
 import { createPassword } from "../../../core/data/user/Password"
 
 const View: React.FC<{ state: State }> = ({ state }) => {
-  const { email, password } = state.publicState.login
+  const { email, password, data } = state.publicState.login
   const disabled =
+    data._t === "Loading" ||
     fromMaybe(createEmail(email)) == null ||
     fromMaybe(createPassword(password)) == null
   return (
     <div className={styles.container}>
       <div className={styles.box}>
         <div className={styles.title}>LOGIN</div>
-        <div className={styles.form}>
+        <form className={styles.form}>
           <div className={styles.formTitle}>Email</div>
           <input
             className={styles.formInput}
@@ -33,13 +34,14 @@ const View: React.FC<{ state: State }> = ({ state }) => {
           />
           <br />
           <button
+            type={"submit"}
             className={styles.formButton(disabled)}
             disabled={disabled}
             onClick={() => emit(loginSubmit)}
           >
             Submit
           </button>
-        </div>
+        </form>
       </div>
     </div>
   )
@@ -87,6 +89,8 @@ const styles = {
     color: colors.blue500,
   }),
   formInput: css({
+    ...body.small.regular,
+    color: colors.neutral800,
     padding: `${theme.s1} ${theme.s2}`,
     borderRadius: theme.br2,
     border: `1px solid ${colors.neutral300}`,

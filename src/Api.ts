@@ -26,7 +26,7 @@ import {
   UrlRecord,
 } from "../../core/data/Api"
 import { Either, left, right } from "../../core/data/Either"
-import { emit } from "./Program"
+import { emit } from "./emit"
 
 export type ApiError<E> =
   | "NETWORK_ERROR"
@@ -335,6 +335,7 @@ function requestPayloadHandler<E, D>(
         return right(data.value.data)
       case "Err":
         if (data.value.code === "UNAUTHORISED") {
+          // TODO: Leak of SRP
           emit((s) => [{ _t: "Public", publicState: s.publicState }, []])
         }
         return left(data.value.code)

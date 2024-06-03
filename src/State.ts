@@ -1,11 +1,9 @@
 import { User } from "../../core/app/User"
 import * as RemoteData from "../../core/data/RemoteData"
-import type { Action, Cmd } from "./Action"
-import { ApiError } from "./Api"
 import * as LocalStorage from "./Data/LocalStorage"
 import { Route, toRoute } from "./Route"
-import * as ApiProfile from "./Api/Profile"
-import * as ApiLogin from "./Api/Login"
+import type { ApiError } from "./Api"
+import type * as ApiLogin from "./Api/Login"
 
 export type State =
   | {
@@ -40,13 +38,8 @@ export type AuthState = {
   user: User
 }
 
-export function init(): [State, Cmd] {
+export function init(): State {
   const token = LocalStorage.getToken()
-
-  const cmd =
-    token != null
-      ? [ApiProfile.call(token).then((r) => profileResponse(token, r))]
-      : []
 
   const login: LoginState = {
     email: "",
@@ -59,23 +52,7 @@ export function init(): [State, Cmd] {
     login,
   }
 
-  return [{ _t: token == null ? "Public" : "LoadingAuth", publicState }, cmd]
-}
-
-function profileResponse(token: string, response: ApiProfile.Response): Action {
-  return (state: State) => {
-    if (response._t === "Left") {
-      LocalStorage.removeToken()
-      return [{ _t: "Public", publicState: state.publicState }, []]
-    }
-
-    const authState = { token, user: response.value }
-    return [{ ...state, _t: "Auth", authState }, []]
-  }
-}
-
-export function update(state: State, action: Action): [State, Cmd] {
-  return action(state)
+  return { _t: token == null ? "Public" : "LoadingAuth", publicState }
 }
 
 export function _PublicState(
