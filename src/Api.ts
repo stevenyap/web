@@ -291,7 +291,7 @@ function toStringRecord<R extends string>(
 ): Record<string, string> {
   return Object.entries(urlData).reduce(
     (acc: Record<string, string>, [key, value]) => {
-      acc[key] = String(value)
+      acc[key] = value == null ? "" : JSON.stringify(value)
       return acc
     },
     {},

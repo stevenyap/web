@@ -146,6 +146,7 @@ export const theme = {
   s120: "480px",
   s150: "600px",
   s160: "640px",
+  s200: "800px",
   // border-radius
   br0: "0px",
   br0_5: "2px",

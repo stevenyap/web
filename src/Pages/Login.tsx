@@ -1,7 +1,11 @@
 import { css } from "@emotion/css"
 import { body, buttons, breakpoint, colors, theme } from "../View/Theme"
 import { State } from "../State"
-import { loginSubmit, loginChangeEmail, loginChangePassword } from "../Action"
+import {
+  loginSubmit,
+  loginChangeEmail,
+  loginChangePassword,
+} from "../Action/Login"
 import { emit } from "../emit"
 import { createEmail } from "../../../core/data/user/Email"
 import { fromMaybe } from "../../../core/data/Maybe"

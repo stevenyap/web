@@ -4,6 +4,7 @@ import { flushSync } from "react-dom"
 import { createRoot } from "react-dom/client"
 import * as State from "./State"
 import * as Action from "./Action"
+import * as Route from "./Action/Route"
 import * as Runtime from "./Runtime"
 import View from "./View"
 import { setEmit } from "./emit"
@@ -26,8 +27,8 @@ function render(state: State.State): void {
 }
 
 // Export out the emit function
-export const emit = Runtime.start(State.init(), Action.init(), render)
+export const emit = Runtime.start(State.init(), Action.initCmd(), render)
 setEmit(emit)
 
 // Subscriptions
-window.onpopstate = () => emit(Action.onUrlChange)
+window.onpopstate = () => emit(Route.onUrlChange)
