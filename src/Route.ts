@@ -1,12 +1,7 @@
 import * as JD from "decoders"
 import * as Teki from "teki"
-import {
-  PositiveInt,
-  createPositiveInt,
-  positiveIntDecoder,
-} from "../../core/data/PositiveInt"
+import { PositiveInt, positiveIntDecoder } from "../../core/data/PositiveInt"
 import { stringNumberDecoder } from "../../core/data/Decoder"
-import { fromMaybe } from "../../core/data/Maybe"
 
 export type Route =
   | { _t: "Home" }
@@ -71,56 +66,4 @@ function toRoute_(url: string, routeDecoders: RouteDecoder[]): Route {
   }, null)
 
   return route != null ? route : toRoute_(url, rest)
-}
-
-// For testing purpose
-export function _test(): void {
-  const userID = fromMaybe(createPositiveInt(1))
-  if (userID == null) throw "This is invalid positive int!"
-
-  const urls: Array<[string, Route]> = [
-    ["https://example.com", { _t: "Home" }],
-    ["https://example.com#123", { _t: "Home" }],
-    ["https://example.com?p=1", { _t: "Home" }],
-    ["https://example.com?p=1#123", { _t: "Home" }],
-    ["https://example.com/", { _t: "Home" }],
-    ["https://example.com/#123", { _t: "Home" }],
-    ["https://example.com/?p=1", { _t: "Home" }],
-    ["https://example.com/?p=1#123", { _t: "Home" }],
-    ["https://example.com/login", { _t: "Login" }],
-    ["https://example.com/login#123", { _t: "Login" }],
-    ["https://example.com/login?p=1", { _t: "Login" }],
-    ["https://example.com/login?p=1#123", { _t: "Login" }],
-    ["https://example.com/login/", { _t: "Login" }],
-    ["https://example.com/login/#123", { _t: "Login" }],
-    ["https://example.com/login/?p=1", { _t: "Login" }],
-    ["https://example.com/login/?p=1#123", { _t: "Login" }],
-    ["https://example.com/user/1", { _t: "User", userID }],
-    ["https://example.com/user/1#123", { _t: "User", userID }],
-    ["https://example.com/user/1?p=1", { _t: "User", userID }],
-    ["https://example.com/user/1?p=1#123", { _t: "User", userID }],
-    ["https://example.com/user/1/", { _t: "User", userID }],
-    ["https://example.com/user/1/#123", { _t: "User", userID }],
-    ["https://example.com/user/1/?p=1", { _t: "User", userID }],
-    ["https://example.com/user/1/?p=1#123", { _t: "User", userID }],
-    ["https://example.com/a", { _t: "NotFound" }],
-    ["https://example.com/not-found", { _t: "NotFound" }],
-  ]
-  for (const [u, r] of urls) {
-    const route = toRoute(u)
-    if (r._t != route._t) {
-      console.error(u, JSON.stringify(r), JSON.stringify(route))
-    }
-  }
-
-  const routes: Route[] = [
-    { _t: "Home" },
-    { _t: "Login" },
-    { _t: "User", userID },
-    { _t: "NotFound" },
-  ]
-
-  for (const route of routes) {
-    console.info(route._t, toUrl(route))
-  }
 }

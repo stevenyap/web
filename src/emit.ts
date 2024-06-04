@@ -1,5 +1,5 @@
-import { EmitFn, Action } from "./Runtime"
-import { State } from "./State"
+import type { EmitFn, Action } from "./Runtime"
+import type { State } from "./State"
 
 // Due to cyclic dependencies between Runtime and View,
 // we have to do this trick to allow View to import emit

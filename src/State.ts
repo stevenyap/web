@@ -1,15 +1,15 @@
-import { User } from "../../core/app/User"
-import { PositiveInt } from "../../core/data/PositiveInt"
 import * as RemoteData from "../../core/data/RemoteData"
 import * as PaginationData from "../../core/data/PaginationData"
+import type { User } from "../../core/app/User"
+import type { PositiveInt } from "../../core/data/PositiveInt"
 import * as LocalStorage from "./Data/LocalStorage"
 import * as Toast from "./Data/Toast"
-import { Route, toRoute } from "./Route"
-import type { ApiError } from "./Api"
 import type * as ApiLogin from "./Api/Login"
 import type * as ApiUsers from "./Api/Users"
 import type * as ApiUser from "./Api/User"
 import type { Cmd } from "./Action"
+import type { Route } from "./Route"
+import type { ApiError } from "./Api"
 
 export type State =
   | {
@@ -61,7 +61,7 @@ export type UserState = {
   data: RemoteData.RemoteData<ApiError<ApiUser.ErrorCode>, ApiUser.Payload>
 }
 
-export function init(): State {
+export function init(route: Route): State {
   const token = LocalStorage.getToken()
 
   const login: LoginState = {
@@ -71,7 +71,7 @@ export function init(): State {
   }
 
   const publicState: PublicState = {
-    route: toRoute(window.location.href),
+    route,
     login,
     toasts: [],
   }
