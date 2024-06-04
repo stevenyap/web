@@ -10,7 +10,7 @@ import {
 } from "../State"
 import type { PositiveInt } from "../../../core/data/PositiveInt"
 import * as RemoteData from "../../../core/data/RemoteData"
-import * as ApiUser from "../Api/User"
+import * as ApiUserDetail from "../Api/User/Detail"
 import type { Action, Cmd } from "../Action"
 
 export function onEnterRoute(state: State, userID: PositiveInt): [State, Cmd] {
@@ -20,13 +20,13 @@ export function onEnterRoute(state: State, userID: PositiveInt): [State, Cmd] {
     return user.userID !== userID || user.data._t !== "Success"
       ? [
           _UserState(fullState, { data: RemoteData.loading() }),
-          [ApiUser.call(token, { userID }).then((r) => userResponse(r))],
+          [ApiUserDetail.call(token, { userID }).then((r) => userResponse(r))],
         ]
       : [fullState, []]
   }, state)
 }
 
-function userResponse(response: ApiUser.Response): Action {
+function userResponse(response: ApiUserDetail.Response): Action {
   return (state: State) =>
     mapFullState((fullState: FullState) => {
       if (response._t === "Left") {

@@ -5,8 +5,8 @@ import type { PositiveInt } from "../../core/data/PositiveInt"
 import * as LocalStorage from "./Data/LocalStorage"
 import * as Toast from "./Data/Toast"
 import type * as ApiLogin from "./Api/Login"
-import type * as ApiUsers from "./Api/Users"
-import type * as ApiUser from "./Api/User"
+import type * as ApiUserList from "./Api/User/List"
+import type * as ApiUserDetail from "./Api/User/Detail"
 import type { Cmd } from "./Action"
 import type { Route } from "./Route"
 import type { ApiError } from "./Api"
@@ -51,14 +51,17 @@ export type UsersState = {
   limit: PositiveInt
   lastID: PositiveInt | null
   data: PaginationData.PaginationData<
-    ApiError<ApiUsers.ErrorCode>,
-    ApiUsers.Payload
+    ApiError<ApiUserList.ErrorCode>,
+    ApiUserList.Payload
   >
 }
 
 export type UserState = {
   userID: PositiveInt | null
-  data: RemoteData.RemoteData<ApiError<ApiUser.ErrorCode>, ApiUser.Payload>
+  data: RemoteData.RemoteData<
+    ApiError<ApiUserDetail.ErrorCode>,
+    ApiUserDetail.Payload
+  >
 }
 
 export function init(route: Route): State {

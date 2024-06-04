@@ -9,7 +9,7 @@ import {
   mapFullState,
 } from "../State"
 import * as PaginationData from "../../../core/data/PaginationData"
-import * as ApiUsers from "../Api/Users"
+import * as ApiUserList from "../Api/User/List"
 import type { Action, Cmd } from "../Action"
 
 export function onEnterRoute(state: State): [State, Cmd] {
@@ -20,7 +20,7 @@ export function onEnterRoute(state: State): [State, Cmd] {
       ? [
           _UsersState(fullState, { data: PaginationData.loading() }),
           [
-            ApiUsers.call(token, { lastID: null, limit: users.limit }).then(
+            ApiUserList.call(token, { lastID: null, limit: users.limit }).then(
               (r) => usersResponse(r),
             ),
           ],
@@ -29,7 +29,7 @@ export function onEnterRoute(state: State): [State, Cmd] {
   }, state)
 }
 
-function usersResponse(response: ApiUsers.Response): Action {
+function usersResponse(response: ApiUserList.Response): Action {
   return (state: State) =>
     mapFullState((fullState: FullState) => {
       if (response._t === "Left") {

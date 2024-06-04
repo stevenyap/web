@@ -1,7 +1,7 @@
 import { css } from "@emotion/css"
 import { body, buttons, colors, theme } from "../View/Theme"
 import { FullState, UserState } from "../State"
-import * as ApiUser from "../Api/User"
+import * as ApiUserDetail from "../Api/User/Detail"
 import { navigate } from "../View/Link"
 import { toUrl } from "../Route"
 
@@ -29,7 +29,7 @@ const User: React.FC<{ user: UserState }> = ({ user }) => {
     case "Failure":
       return (
         <div className={styles.error}>
-          {ApiUser.errorString(user.data.error)}
+          {ApiUserDetail.errorString(user.data.error)}
         </div>
       )
     case "Success":
