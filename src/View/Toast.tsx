@@ -1,6 +1,6 @@
 import React from "react"
 import { css } from "@emotion/css"
-import { emit } from "../emit"
+import { emit } from "../Emit"
 import { Toast } from "../Data/Toast"
 import { body, keyframes, colors, theme, breakpoint, layoutSize } from "./Theme"
 import { AlertError, AlertLoading, AlertSuccess } from "./Svg"

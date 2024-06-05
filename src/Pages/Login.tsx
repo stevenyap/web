@@ -6,7 +6,7 @@ import {
   loginChangeEmail,
   loginChangePassword,
 } from "../Action/Login"
-import { emit } from "../emit"
+import { emit } from "../Emit"
 import { createEmail } from "../../../core/Data/User/Email"
 import { fromMaybe } from "../../../core/Data/Maybe"
 import { createPassword } from "../../../core/Data/User/Password"

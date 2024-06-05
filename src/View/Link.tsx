@@ -1,6 +1,6 @@
 import { BaseSyntheticEvent } from "react"
 import { navigateTo } from "../Action/Route"
-import { emit } from "../emit"
+import { emit } from "../Emit"
 
 export function navigate(url: string, onClick?: () => void) {
   return {

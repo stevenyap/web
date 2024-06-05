@@ -9,7 +9,7 @@ import Login from "./Pages/Login"
 import Home from "./Pages/Home"
 import User from "./Pages/User"
 import { logout } from "./Action"
-import { emit } from "./emit"
+import { emit } from "./Emit"
 
 const View: React.FC<{ state: State }> = ({ state }) => {
   if (state._t === "LoadingAuth") {

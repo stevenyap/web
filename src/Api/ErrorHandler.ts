@@ -1,5 +1,5 @@
 import { ApiResponse } from "../Api"
-import { emit } from "../emit"
+import { emit } from "../Emit"
 
 export function errorHandler<ErrorCode, Payload>(
   r: ApiResponse<ErrorCode, Payload>,

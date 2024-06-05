@@ -8,7 +8,7 @@ import * as Action from "./Action"
 import * as ActionRoute from "./Action/Route"
 import * as Runtime from "./Runtime"
 import View from "./View"
-import { setEmit } from "./emit"
+import { setEmit } from "./Emit"
 
 const rootElement = document.getElementById("app")
 if (rootElement == null) {
