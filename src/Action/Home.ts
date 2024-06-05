@@ -8,7 +8,7 @@ import {
   _UsersState,
   mapFullState,
 } from "../State"
-import * as PaginationData from "../../../core/data/PaginationData"
+import * as PaginationData from "../../../core/Data/PaginationData"
 import * as ApiUserList from "../Api/User/List"
 import type { Action, Cmd } from "../Action"
 

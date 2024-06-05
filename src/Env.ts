@@ -1,5 +1,5 @@
 import * as JD from "decoders"
-import { stringNumberDecoder } from "../../core/data/Decoder"
+import { stringNumberDecoder } from "../../core/Data/Decoder"
 
 const env = JD.object({
   APP_ENV: JD.string,

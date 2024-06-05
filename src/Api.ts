@@ -24,8 +24,8 @@ import {
   PutApi,
   ResponseJson,
   UrlRecord,
-} from "../../core/data/Api"
-import { Either, left, right } from "../../core/data/Either"
+} from "../../core/Data/Api"
+import { Either, left, right } from "../../core/Data/Either"
 
 export type ApiError<E> =
   | "NETWORK_ERROR"

@@ -1,7 +1,7 @@
 import * as JD from "decoders"
 import * as Teki from "teki"
-import { PositiveInt, positiveIntDecoder } from "../../core/data/PositiveInt"
-import { stringNumberDecoder } from "../../core/data/Decoder"
+import { PositiveInt, positiveIntDecoder } from "../../core/Data/PositiveInt"
+import { stringNumberDecoder } from "../../core/Data/Decoder"
 
 export type Route =
   | { _t: "Home" }

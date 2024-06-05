@@ -7,9 +7,9 @@ import {
   loginChangePassword,
 } from "../Action/Login"
 import { emit } from "../emit"
-import { createEmail } from "../../../core/data/user/Email"
-import { fromMaybe } from "../../../core/data/Maybe"
-import { createPassword } from "../../../core/data/user/Password"
+import { createEmail } from "../../../core/Data/User/Email"
+import { fromMaybe } from "../../../core/Data/Maybe"
+import { createPassword } from "../../../core/Data/User/Password"
 
 const View: React.FC<{ state: State }> = ({ state }) => {
   const { email, password, data } = state.publicState.login

@@ -1,5 +1,5 @@
 import { ApiResponse, apiErrorString, ApiError, authGetApi } from "../Api"
-import { contract, ErrorCode, Payload } from "../../../core/api/Profile"
+import { contract, ErrorCode, Payload } from "../../../core/Api/Profile"
 import { errorHandler } from "./ErrorHandler"
 
 export type { ErrorCode, Payload }

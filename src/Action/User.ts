@@ -8,8 +8,8 @@ import {
   _UsersState,
   mapFullState,
 } from "../State"
-import type { PositiveInt } from "../../../core/data/PositiveInt"
-import * as RemoteData from "../../../core/data/RemoteData"
+import type { PositiveInt } from "../../../core/Data/PositiveInt"
+import * as RemoteData from "../../../core/Data/RemoteData"
 import * as ApiUserDetail from "../Api/User/Detail"
 import type { Action, Cmd } from "../Action"
 

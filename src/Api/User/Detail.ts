@@ -4,7 +4,7 @@ import {
   ErrorCode,
   UrlParams,
   Payload,
-} from "../../../../core/api/User/Detail"
+} from "../../../../core/Api/User/Detail"
 import { errorHandler } from "../ErrorHandler"
 
 export type { ErrorCode, Payload }

@@ -1,4 +1,4 @@
-import { Either, left, right } from "../../../core/data/Either"
+import { Either, left, right } from "../../../core/Data/Either"
 
 export type RequestError = "NETWORK_ERROR" | "PAYLOAD_TOO_LARGE"
 export type RequestData = [number, unknown]
