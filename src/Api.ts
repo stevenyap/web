@@ -11,6 +11,7 @@ import {
 import {
   AuthApi,
   AuthNoneBodyApi,
+  AuthStreamApi,
   PublicApi,
   PublicNoneBodyApi,
   ResponseJson,
@@ -96,6 +97,26 @@ export async function authNoneBodyApi<
   return request(makePath(path), {
     method,
     headers: getAuthHeaders(token),
+  }).then(handleRequest(responseDecoder))
+}
+
+export async function authStreamApi<
+  Route extends string,
+  UrlParams extends UrlRecord<Route>,
+  ErrorCode,
+  Payload,
+>(
+  token: string,
+  contract: AuthStreamApi<Route, UrlParams, ErrorCode, Payload>,
+  urlData: UrlParams,
+  bodyData: File,
+): Promise<ApiResponse<ErrorCode, Payload>> {
+  const { route, responseDecoder } = contract
+  const path = Teki.reverse(route)(toStringRecord(urlData))
+
+  return request(makePath(path), {
+    headers: getAuthHeaders(token),
+    body: bodyData,
   }).then(handleRequest(responseDecoder))
 }
 
