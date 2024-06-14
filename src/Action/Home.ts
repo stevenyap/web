@@ -1,54 +1,49 @@
-import {
-  FullState,
-  State,
-  _Login,
-  _PublicState,
-  _Toast,
-  _UserState,
-  _UsersState,
-  mapFullState,
-} from "../State"
+import { AuthState, State, mapAuthState } from "../State"
 import * as PaginationData from "../../../core/Data/PaginationData"
-import * as ApiUserList from "../Api/User/List"
-import type { Action, Cmd } from "../Action"
+import { Nat0 } from "../../../core/Data/Number/Nat"
+import * as Api from "../Api/User/List"
+import { type Action } from "../Action"
+import { Cmd, cmd } from "../Cmd"
+import { _UsersState } from "../State/Users"
 
 export function onEnterRoute(state: State): [State, Cmd] {
-  return mapFullState((fullState: FullState) => {
-    const { token, users } = fullState.authState
+  return mapAuthState((authState: AuthState) => {
+    const { token, users } = authState
 
     return users.data._t === "NotAsked"
       ? [
-          _UsersState(fullState, { data: PaginationData.loading() }),
+          _UsersState(authState, { data: PaginationData.loading() }),
           [
-            ApiUserList.call(token, { lastID: null, limit: users.limit }).then(
-              (r) => usersResponse(r),
-            ),
+            Api.call(token.unwrap(), {
+              offset: Nat0,
+              limit: users.limit,
+            }).then((r) => usersResponse(r)),
           ],
         ]
-      : [fullState, []]
+      : [authState, cmd()]
   }, state)
 }
 
-function usersResponse(response: ApiUserList.Response): Action {
+function usersResponse(response: Api.Response): Action {
   return (state: State) =>
-    mapFullState((fullState: FullState) => {
+    mapAuthState((authState: AuthState) => {
       if (response._t === "Left") {
         return [
-          _UsersState(fullState, {
+          _UsersState(authState, {
             data: PaginationData.failure(response.error),
           }),
           [],
         ]
       }
       return [
-        _UsersState(fullState, {
+        _UsersState(authState, {
           data: PaginationData.appendNewData(
-            fullState.authState.users.data,
+            authState.users.data,
             response.value,
-            fullState.authState.users.limit,
+            authState.users.limit,
           ),
         }),
-        [],
+        cmd(),
       ]
     }, state)
 }

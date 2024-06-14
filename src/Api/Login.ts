@@ -1,17 +1,16 @@
-import { ApiResponse, apiErrorString, ApiError, postApi } from "../Api"
+import { ApiResponse, apiErrorString, ApiError, publicApi } from "../Api"
 import {
   contract,
   ErrorCode,
   Payload,
   BodyParams,
 } from "../../../core/Api/Login"
-import { errorHandler } from "./ErrorHandler"
 
 export type { ErrorCode, Payload }
 export type Response = ApiResponse<ErrorCode, Payload>
 
 export async function call(params: BodyParams): Promise<Response> {
-  return postApi(contract, {}, params).then(errorHandler)
+  return publicApi(contract, {}, params)
 }
 
 export function errorString(code: ApiError<ErrorCode>): string {

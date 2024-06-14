@@ -1,18 +1,16 @@
 import { css } from "@emotion/css"
-import { body, buttons, breakpoint, colors, theme } from "../View/Theme"
+import { body, buttons, breakpoint, colors, theme, links } from "../View/Theme"
 import { State } from "../State"
-import {
-  loginSubmit,
-  loginChangeEmail,
-  loginChangePassword,
-} from "../Action/Login"
+import * as LoginAction from "../Action/Login"
 import { emit } from "../Emit"
 import { createEmail } from "../../../core/Data/User/Email"
 import { fromMaybe } from "../../../core/Data/Maybe"
 import { createPassword } from "../../../core/Data/User/Password"
+import { pushModal } from "../Action"
 
-const View: React.FC<{ state: State }> = ({ state }) => {
-  const { email, password, data } = state.publicState.login
+type Props = { state: State }
+function View({ state }: Props): JSX.Element {
+  const { email, password, data } = state.login
   const disabled =
     data._t === "Loading" ||
     fromMaybe(createEmail(email)) == null ||
@@ -26,26 +24,38 @@ const View: React.FC<{ state: State }> = ({ state }) => {
           <input
             className={styles.formInput}
             value={email}
-            onChange={(e) => emit(loginChangeEmail(e.target.value))}
+            onChange={(e) => emit(LoginAction.changeEmail(e.target.value))}
           />
-          <br />
           <div className={styles.formTitle}>Password</div>
           <input
             className={styles.formInput}
             value={password}
-            onChange={(e) => emit(loginChangePassword(e.target.value))}
+            onChange={(e) => emit(LoginAction.changePassword(e.target.value))}
             type={"password"}
           />
-          <br />
           <button
-            type={"submit"}
-            className={styles.formButton(disabled)}
+            type="submit"
+            className={styles.formButton}
             disabled={disabled}
-            onClick={() => emit(loginSubmit)}
+            onClick={() => emit(LoginAction.submit)}
           >
             Submit
           </button>
         </form>
+        <div className={styles.termAndPrivacy}>
+          <a
+            className={styles.linkButton}
+            onClick={() => emit(pushModal("TermsAndConditions"))}
+          >
+            Terms and Conditions
+          </a>
+          <a
+            className={styles.linkButton}
+            onClick={() => emit(pushModal("PrivacyPolicies"))}
+          >
+            Privacy Policies
+          </a>
+        </div>
       </div>
     </div>
   )
@@ -86,7 +96,7 @@ const styles = {
     width: "100%",
     display: "flex",
     flexDirection: "column",
-    gap: theme.s1,
+    gap: theme.s2,
   }),
   formTitle: css({
     ...body.small.regular,
@@ -100,12 +110,17 @@ const styles = {
     border: `1px solid ${colors.neutral300}`,
     boxShadow: theme.elevation.small,
   }),
-  formButton: (disabled: boolean) =>
-    css({
-      ...buttons.primary.s2,
-      background: disabled ? colors.neutral400 : colors.blue500,
-      cursor: disabled ? "default" : "pointer",
-    }),
+  formButton: css({
+    ...buttons.primary.s2,
+    marginTop: theme.s2,
+  }),
+  termAndPrivacy: css({
+    display: "flex",
+    gap: theme.s6,
+  }),
+  linkButton: css({
+    ...links.s2,
+  }),
 }
 
 export default View

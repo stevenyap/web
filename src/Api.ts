@@ -1,5 +1,6 @@
 import * as JD from "decoders"
 import * as Teki from "teki"
+import * as Logger from "./Data/Logger"
 import Env from "./Env"
 import {
   RequestData,
@@ -9,205 +10,18 @@ import {
 } from "./Data/Request"
 import {
   AuthApi,
-  AuthDeleteApi,
-  AuthGetApi,
   AuthNoneBodyApi,
-  AuthPatchApi,
-  AuthPostApi,
-  AuthPutApi,
-  DeleteApi,
-  GetApi,
-  PatchApi,
-  PostApi,
   PublicApi,
   PublicNoneBodyApi,
-  PutApi,
   ResponseJson,
   UrlRecord,
 } from "../../core/Data/Api"
 import { Either, left, right } from "../../core/Data/Either"
-
-export type ApiError<E> =
-  | "NETWORK_ERROR"
-  | "SERVER_ERROR"
-  | "UNAUTHORISED"
-  | "DECODE_ERROR"
-  | "PAYLOAD_TOO_LARGE"
-  | E
+import { emit } from "./Emit"
 
 export type ApiResponse<E, D> = Either<ApiError<E>, D>
-export function getErrorCode<E>(error: ApiError<E>): E | null {
-  switch (error) {
-    case "NETWORK_ERROR":
-    case "SERVER_ERROR":
-    case "UNAUTHORISED":
-    case "DECODE_ERROR":
-    case "PAYLOAD_TOO_LARGE":
-      return null
-    default:
-      return error
-  }
-}
-export function getApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  ErrorCode,
-  Payload,
->(
-  contract: GetApi<Route, UrlParams, ErrorCode, Payload>,
-  urlData: UrlParams,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return publicNoneBodyApi(contract, urlData)
-}
 
-export function deleteApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  ErrorCode,
-  Payload,
->(
-  contract: DeleteApi<Route, UrlParams, ErrorCode, Payload>,
-  urlData: UrlParams,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return publicNoneBodyApi(contract, urlData)
-}
-
-export function postApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  RequestBody,
-  ErrorCode,
-  Payload,
->(
-  contract: PostApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
-  urlData: UrlParams,
-  bodyData: RequestBody,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return publicApi(contract, urlData, bodyData)
-}
-
-export function putApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  RequestBody,
-  ErrorCode,
-  Payload,
->(
-  contract: PutApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
-  urlData: UrlParams,
-  bodyData: RequestBody,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return publicApi(contract, urlData, bodyData)
-}
-
-export function patchApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  RequestBody,
-  ErrorCode,
-  Payload,
->(
-  contract: PatchApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
-  urlData: UrlParams,
-  bodyData: RequestBody,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return publicApi(contract, urlData, bodyData)
-}
-
-export function authGetApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  ErrorCode,
-  Payload,
->(
-  token: string,
-  contract: AuthGetApi<Route, UrlParams, ErrorCode, Payload>,
-  urlData: UrlParams,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return authNoneBodyApi(token, contract, urlData)
-}
-
-export function authDeleteApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  ErrorCode,
-  Payload,
->(
-  token: string,
-  contract: AuthDeleteApi<Route, UrlParams, ErrorCode, Payload>,
-  urlData: UrlParams,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return authNoneBodyApi(token, contract, urlData)
-}
-
-export function authPostApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  RequestBody,
-  ErrorCode,
-  Payload,
->(
-  token: string,
-  contract: AuthPostApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
-  urlData: UrlParams,
-  bodyData: RequestBody,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return authApi(token, contract, urlData, bodyData)
-}
-
-export function authPutApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  RequestBody,
-  ErrorCode,
-  Payload,
->(
-  token: string,
-  contract: AuthPutApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
-  urlData: UrlParams,
-  bodyData: RequestBody,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return authApi(token, contract, urlData, bodyData)
-}
-
-export function authPatchApi<
-  Route extends string,
-  UrlParams extends UrlRecord<Route>,
-  RequestBody,
-  ErrorCode,
-  Payload,
->(
-  token: string,
-  contract: AuthPatchApi<Route, UrlParams, RequestBody, ErrorCode, Payload>,
-  urlData: UrlParams,
-  bodyData: RequestBody,
-): Promise<ApiResponse<ErrorCode, Payload>> {
-  return authApi(token, contract, urlData, bodyData)
-}
-
-export function apiErrorString<E>(
-  error: ApiError<E>,
-  fn: (e: E) => string,
-): string {
-  switch (error) {
-    case "NETWORK_ERROR":
-      return "Internet is unavailable"
-    case "SERVER_ERROR":
-      return "Something went wrong with the server"
-    case "UNAUTHORISED":
-      return "Please login again to start using the app"
-    case "DECODE_ERROR":
-      return "Something went wrong with the server response"
-    case "PAYLOAD_TOO_LARGE":
-      return "Request is too large"
-    default:
-      return fn(error)
-  }
-}
-
-// Internal
-
-async function publicApi<
+export async function publicApi<
   Route extends string,
   UrlParams extends UrlRecord<Route>,
   RequestBody,
@@ -227,7 +41,7 @@ async function publicApi<
   }).then(handleRequest(responseDecoder))
 }
 
-async function publicNoneBodyApi<
+export async function publicNoneBodyApi<
   Route extends string,
   UrlParams extends UrlRecord<Route>,
   ErrorCode,
@@ -244,7 +58,7 @@ async function publicNoneBodyApi<
   }).then(handleRequest(responseDecoder))
 }
 
-async function authApi<
+export async function authApi<
   Route extends string,
   UrlParams extends UrlRecord<Route>,
   RequestBody,
@@ -266,7 +80,7 @@ async function authApi<
   }).then(handleRequest(responseDecoder))
 }
 
-async function authNoneBodyApi<
+export async function authNoneBodyApi<
   Route extends string,
   UrlParams extends UrlRecord<Route>,
   ErrorCode,
@@ -284,6 +98,36 @@ async function authNoneBodyApi<
     headers: getAuthHeaders(token),
   }).then(handleRequest(responseDecoder))
 }
+
+export type ApiError<E> =
+  | "NETWORK_ERROR"
+  | "SERVER_ERROR"
+  | "UNAUTHORISED"
+  | "DECODE_ERROR"
+  | "PAYLOAD_TOO_LARGE"
+  | E
+
+export function apiErrorString<E>(
+  error: ApiError<E>,
+  fn: (e: E) => string,
+): string {
+  switch (error) {
+    case "NETWORK_ERROR":
+      return "Internet is unavailable"
+    case "SERVER_ERROR":
+      return "Something went wrong with the server"
+    case "UNAUTHORISED":
+      return "Please login again to start using the app"
+    case "DECODE_ERROR":
+      return "Something went wrong with the server response"
+    case "PAYLOAD_TOO_LARGE":
+      return "Request payload is too large"
+    default:
+      return fn(error)
+  }
+}
+
+// Internal
 
 function toStringRecord<R extends string>(
   urlData: UrlRecord<R>,
@@ -333,21 +177,22 @@ function requestPayloadHandler<E, D>(
       case "Ok":
         return right(data.value.data)
       case "Err":
+        if (data.value.code === "UNAUTHORISED") {
+          emit((s) => [{ ...s, _t: "Public" }, []])
+        }
         return left(data.value.code)
       case "ServerError":
-        console.error(data.value.errorID)
+        Logger.error(data.value.errorID)
         return left("SERVER_ERROR")
     }
   } else {
-    console.error(data.error.text)
+    Logger.error(data.error.text)
     return left("DECODE_ERROR")
   }
 }
 
 function requestErrorHandler<E, D>(error: RequestError): ApiResponse<E, D> {
   switch (error) {
-    case "PAYLOAD_TOO_LARGE":
-      return left("PAYLOAD_TOO_LARGE")
     case "NETWORK_ERROR":
       return left("NETWORK_ERROR")
   }

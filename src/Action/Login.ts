@@ -1,108 +1,62 @@
 import { toUrl } from "../Route"
-import {
-  AuthState,
-  FullState,
-  PublicState,
-  State,
-  UserState,
-  UsersState,
-  _Login,
-  _PublicState,
-  _Toast,
-  _UserState,
-  _UsersState,
-} from "../State"
+import { State, initAuthState } from "../State"
 import * as RemoteData from "../../../core/Data/RemoteData"
 import { createEmail } from "../../../core/Data/User/Email"
 import { fromMaybe } from "../../../core/Data/Maybe"
 import { createPassword } from "../../../core/Data/User/Password"
-import { positiveInt } from "../../../core/Data/PositiveInt"
-import * as PaginationData from "../../../core/Data/PaginationData"
-import { User } from "../../../core/App/User"
 import { navigateTo } from "./Route"
-import * as LocalStorage from "../Data/LocalStorage"
-import * as Toast from "../Data/Toast"
-import * as ApiLogin from "../Api/Login"
-import type { Action, Cmd } from "../Action"
+import * as Api from "../Api/Login"
+import { type Action } from "../Action"
+import * as Toast from "../State/Toast"
+import { Cmd, cmd, perform } from "../Cmd"
+import { _LoginState, initLoginState } from "../State/Login"
 
-export function loginChangeEmail(email: string): Action {
+export function changeEmail(email: string): Action {
   return (state: State) => {
-    return [_Login(state, { email }), []]
+    return [_LoginState(state, { email }), cmd()]
   }
 }
 
-export function loginChangePassword(password: string): Action {
+export function changePassword(password: string): Action {
   return (state: State) => {
-    return [_Login(state, { password }), []]
+    return [_LoginState(state, { password }), cmd()]
   }
 }
 
-export function loginSubmit(state: State): [State, Cmd] {
-  const { login } = state.publicState
+export function submit(state: State): [State, Cmd] {
+  const { login } = state
   const email = fromMaybe(createEmail(login.email))
   const password = fromMaybe(createPassword(login.password))
-  if (email == null || password == null) return [state, []]
+  if (email == null || password == null) return [state, cmd()]
 
   return [
-    _Login(state, { data: RemoteData.loading() }),
-    [ApiLogin.call({ email, password }).then((r) => loginResponse(r))],
+    _LoginState(state, { data: RemoteData.loading() }),
+    [Api.call({ email, password }).then((r) => submitResponse(r))],
   ]
 }
 
-function loginResponse(response: ApiLogin.Response): Action {
+function submitResponse(response: Api.Response): Action {
   return (state: State) => {
     if (response._t === "Left") {
-      const toastState = _Toast(
+      const toastState = Toast.add(
         state,
-        Toast.addError(
-          ApiLogin.errorString(response.error),
-          state.publicState.toasts,
-        ),
+        Toast.error(Api.errorString(response.error)),
       )
 
       return [
-        _Login(toastState, { data: RemoteData.failure(response.error) }),
-        [],
+        _LoginState(toastState, {
+          data: RemoteData.failure(response.error),
+        }),
+        cmd(),
       ]
     }
 
     const { token, user: profile } = response.value
-    const toastState = _Toast(
-      state,
-      Toast.addSuccess("Login successfully!", state.publicState.toasts),
-    )
-    const updatedState = _Login(toastState, {
-      email: "",
-      password: "",
-      data: RemoteData.notAsked(),
-    })
-
+    const toastState = Toast.add(state, Toast.success("Login successfully!"))
+    const loginState = _LoginState(toastState, initLoginState())
     return [
-      initFullState(token, profile, updatedState.publicState),
-      [Promise.resolve(navigateTo(toUrl({ _t: "Home" })))],
+      initAuthState(token, profile, loginState),
+      cmd(perform(navigateTo(toUrl({ _t: "Home" })))),
     ]
   }
-}
-
-export function initFullState(
-  token: string,
-  profile: User,
-  publicState: PublicState,
-): FullState {
-  LocalStorage.setToken(token)
-  const limit = positiveInt(20)
-
-  const users: UsersState = {
-    limit,
-    lastID: null,
-    data: PaginationData.notAsked(),
-  }
-
-  const user: UserState = {
-    userID: null,
-    data: RemoteData.notAsked(),
-  }
-
-  const authState: AuthState = { token, profile, users, user }
-  return { _t: "Auth", publicState, authState }
 }

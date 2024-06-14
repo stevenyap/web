@@ -1,11 +1,13 @@
 import { css } from "@emotion/css"
-import { body, colors, theme } from "../View/Theme"
-import { FullState, UsersState } from "../State"
-import * as ApiUserList from "../Api/User/List"
+import { body, colors, links, theme } from "../View/Theme"
+import { AuthState } from "../State"
+import * as Api from "../Api/User/List"
 import { navigate } from "../View/Link"
 import { toUrl } from "../Route"
+import { UsersState } from "../State/Users"
 
-const View: React.FC<{ state: FullState }> = ({ state }) => {
+type Props = { state: AuthState }
+function View({ state }: Props): JSX.Element {
   return (
     <div className={styles.container}>
       <div className={styles.title}>Users</div>
@@ -14,12 +16,13 @@ const View: React.FC<{ state: FullState }> = ({ state }) => {
         <div className={styles.gridHeader}>Name</div>
         <div className={styles.gridHeader}>Email</div>
       </div>
-      <Users users={state.authState.users} />
+      <Users users={state.users} />
     </div>
   )
 }
 
-const Users: React.FC<{ users: UsersState }> = ({ users }) => {
+type UsersProps = { users: UsersState }
+function Users({ users }: UsersProps): JSX.Element {
   switch (users.data._t) {
     case "NotAsked":
       return <></>
@@ -27,28 +30,30 @@ const Users: React.FC<{ users: UsersState }> = ({ users }) => {
       return <div className={styles.loading}>Loading...</div>
     case "Failure":
       return (
-        <div className={styles.error}>
-          {ApiUserList.errorString(users.data.error)}
-        </div>
+        <div className={styles.error}>{Api.errorString(users.data.error)}</div>
       )
     case "Loaded":
     case "LoadingMore":
     case "NoMore":
-      return users.data.data.map((user) => (
-        <div
-          key={user.id.unwrap()}
-          className={styles.grids}
-        >
-          <div className={styles.grid}>{user.id.unwrap()}</div>
-          <a
-            {...navigate(toUrl({ _t: "User", userID: user.id }))}
-            className={styles.gridLink}
-          >
-            {user.name.unwrap()}
-          </a>
-          <div className={styles.grid}>{user.email.unwrap()}</div>
-        </div>
-      ))
+      return (
+        <>
+          {users.data.data.map((user) => (
+            <div
+              key={user.id.unwrap()}
+              className={styles.grids}
+            >
+              <div className={styles.grid}>{user.id.unwrap()}</div>
+              <a
+                {...navigate(toUrl({ _t: "User", userID: user.id }))}
+                className={styles.gridLink}
+              >
+                {user.name.unwrap()}
+              </a>
+              <div className={styles.grid}>{user.email.unwrap()}</div>
+            </div>
+          ))}
+        </>
+      )
   }
 }
 
@@ -79,8 +84,7 @@ const styles = {
     color: colors.neutral700,
   }),
   gridLink: css({
-    ...body.small.regular,
-    color: colors.blue500,
+    ...links.s2,
   }),
   loading: css({
     ...body.small.bold,

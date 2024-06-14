@@ -1,19 +1,14 @@
 import { toRoute } from "../Route"
-import {
-  State,
-  _Login,
-  _PublicState,
-  _Toast,
-  _UserState,
-  _UsersState,
-} from "../State"
-import * as Home from "./Home"
-import * as User from "./User"
-import type { Action, Cmd } from "../Action"
+import { State, _PublicState } from "../State"
+import * as HomeAction from "./Home"
+import * as UserAction from "./User"
+import { type Action } from "../Action"
+import { Cmd, cmd } from "../Cmd"
 
 export function navigateTo(url: string): Action {
   // This will NOT trigger window.onpopstate
   window.history.pushState(null, "", url)
+  // So we need to trigger onUrlChange
   return onUrlChange
 }
 
@@ -24,10 +19,10 @@ export function onUrlChange(state: State): [State, Cmd] {
   switch (route._t) {
     case "Login":
     case "NotFound":
-      return [updatedState, []]
+      return [updatedState, cmd()]
     case "Home":
-      return Home.onEnterRoute(updatedState)
+      return HomeAction.onEnterRoute(updatedState)
     case "User":
-      return User.onEnterRoute(updatedState, route.userID)
+      return UserAction.onEnterRoute(updatedState, route.userID)
   }
 }

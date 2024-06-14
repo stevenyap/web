@@ -1,8 +1,11 @@
 import { css } from "@emotion/css"
-import { body, colors, theme } from "../View/Theme"
+import { body, colors, links, theme } from "../View/Theme"
 import { State } from "../State"
+import { navigate } from "../View/Link"
+import { toUrl } from "../Route"
 
-const View: React.FC<{ state: State }> = ({}) => {
+type Props = { state: State }
+function View({}: Props): JSX.Element {
   return (
     <div className={styles.notFound}>
       <div className={styles.notFoundPad}>
@@ -12,6 +15,12 @@ const View: React.FC<{ state: State }> = ({}) => {
           src={"/assets/logo.png"}
         />
         <div className={styles.notFoundText}>Page Not Found</div>
+        <a
+          {...navigate(toUrl({ _t: "Home" }))}
+          className={styles.notFoundLink}
+        >
+          Back to Home
+        </a>
       </div>
     </div>
   )
@@ -39,6 +48,9 @@ const styles = {
   notFoundText: css({
     ...body.medium.bold,
     color: colors.blue500,
+  }),
+  notFoundLink: css({
+    ...links.s2,
   }),
 }
 

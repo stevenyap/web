@@ -1,6 +1,7 @@
 import { Either, left, right } from "../../../core/Data/Either"
+import * as Logger from "./Logger"
 
-export type RequestError = "NETWORK_ERROR" | "PAYLOAD_TOO_LARGE"
+export type RequestError = "NETWORK_ERROR"
 export type RequestData = [number, unknown]
 export type RequestResult = Either<RequestError, RequestData>
 
@@ -10,11 +11,9 @@ export async function request(
 ): Promise<RequestResult> {
   try {
     const response = await fetch(url, options)
-    return response.status === 413
-      ? left("PAYLOAD_TOO_LARGE")
-      : right([response.status, await response.json()])
+    return right([response.status, await response.json()])
   } catch (error) {
-    console.error(error)
+    Logger.error(error)
     return left("NETWORK_ERROR")
   }
 }

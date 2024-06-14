@@ -5,8 +5,6 @@ import { stringNumberDecoder } from "../core/Data/Decoder"
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
   return {
-    // Seem like cannot move index.html to public
-    // https://stackoverflow.com/questions/76590642/how-to-configure-vite-with-index-html-in-public-folder
     plugins: [react()],
     publicDir: "./public",
     server: {

@@ -1,38 +1,37 @@
 import * as JD from "decoders"
 import * as Teki from "teki"
-import { PositiveInt, positiveIntDecoder } from "../../core/Data/PositiveInt"
-import { stringNumberDecoder } from "../../core/Data/Decoder"
+import { UserID, userIDDecoder } from "../../core/App/User"
 
 export type Route =
   | { _t: "Home" }
   | { _t: "Login" }
-  | { _t: "User"; userID: PositiveInt }
+  | { _t: "User"; userID: UserID }
   | { _t: "NotFound" }
 
 const Router: Record<Route["_t"], RouteDecoder> = {
   Home: {
-    urls: ["/", "/#:_"],
+    url: "/",
     decoder: JD.always({ _t: "Home" }),
   },
   NotFound: {
-    urls: ["/not-found", "/not-found/#:_"],
+    url: "/not-found",
     decoder: JD.always({ _t: "NotFound" }),
   },
   Login: {
-    urls: ["/login", "/login/#:_"],
+    url: "/login",
     decoder: JD.always({ _t: "Login" }),
   },
   User: {
-    urls: ["/user/:userID", "/user/:userID/#:_"],
+    url: "/user/:userID",
     decoder: JD.object({
       _t: JD.always("User"),
-      userID: stringNumberDecoder.transform(positiveIntDecoder.verify),
+      userID: userIDDecoder,
     }),
   },
 }
 
 type RouteDecoder = {
-  urls: string[]
+  url: string
   decoder: JD.Decoder<Route>
 }
 
@@ -56,14 +55,10 @@ export function toRoute(url: string): Route {
 function toRoute_(url: string, routeDecoders: RouteDecoder[]): Route {
   const [current, ...rest] = routeDecoders
   if (current == null) return { _t: "NotFound" }
-  const { urls, decoder } = current
+  const { url: url_, decoder } = current
 
-  const route = urls.reduce((route: Route | null, url_: string) => {
-    if (route != null) return route
-
-    const parseResult = Teki.parse(url_)(url)
-    return parseResult == null ? null : decoder.value(parseResult) || null
-  }, null)
+  const parseResult = Teki.parse(url_)(url)
+  const route = parseResult == null ? null : decoder.value(parseResult) || null
 
   return route != null ? route : toRoute_(url, rest)
 }

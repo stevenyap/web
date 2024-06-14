@@ -1,15 +1,17 @@
 import { css } from "@emotion/css"
 import { body, buttons, colors, theme } from "../View/Theme"
-import { FullState, UserState } from "../State"
-import * as ApiUserDetail from "../Api/User/Detail"
+import { AuthState } from "../State"
+import * as Api from "../Api/User/Detail"
 import { navigate } from "../View/Link"
 import { toUrl } from "../Route"
+import { UserState } from "../State/User"
 
-const View: React.FC<{ state: FullState }> = ({ state }) => {
+type Props = { state: AuthState }
+function View({ state }: Props): JSX.Element {
   return (
     <div className={styles.container}>
       <div className={styles.title}>User Detail</div>
-      <User user={state.authState.user} />
+      <User user={state.user} />
       <a
         {...navigate(toUrl({ _t: "Home" }))}
         className={styles.back}
@@ -20,7 +22,8 @@ const View: React.FC<{ state: FullState }> = ({ state }) => {
   )
 }
 
-const User: React.FC<{ user: UserState }> = ({ user }) => {
+type UserProps = { user: UserState }
+function User({ user }: UserProps): JSX.Element {
   switch (user.data._t) {
     case "NotAsked":
       return <></>
@@ -28,9 +31,7 @@ const User: React.FC<{ user: UserState }> = ({ user }) => {
       return <div className={styles.loading}>Loading...</div>
     case "Failure":
       return (
-        <div className={styles.error}>
-          {ApiUserDetail.errorString(user.data.error)}
-        </div>
+        <div className={styles.error}>{Api.errorString(user.data.error)}</div>
       )
     case "Success":
       const { data } = user.data

@@ -520,6 +520,19 @@ export const buttons = {
   },
 }
 
+export const links = {
+  s2: {
+    ...body.small.regular,
+    color: colors.blue500,
+    cursor: "pointer",
+  },
+  s5: {
+    ...body.large.medium,
+    color: colors.blue500,
+    cursor: "pointer",
+  },
+}
+
 export const hideScrollbar: CSSObject = {
   msOverflowStyle: "none", // Edge
   scrollbarWidth: "none", // Firefox

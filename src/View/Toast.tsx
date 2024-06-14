@@ -1,29 +1,13 @@
-import React from "react"
 import { css } from "@emotion/css"
 import { emit } from "../Emit"
-import { Toast } from "../Data/Toast"
+import { Toast } from "../State/Toast"
 import { body, keyframes, colors, theme, breakpoint, layoutSize } from "./Theme"
-import { AlertError, AlertLoading, AlertSuccess } from "./Svg"
+import Svg from "./Svg"
 import { removeToast } from "../Action"
 
 type Position = "Top" | "Bottom"
-const View: React.FC<{
-  position: Position
-  toast: Toast
-}> = ({ position, toast }) => {
-  const icon = () => {
-    switch (toast.icon) {
-      case "Success":
-        return <AlertSuccess />
-      case "Error":
-        return <AlertError />
-      case "Loading":
-        return <AlertLoading className={styles.loading} />
-      case null:
-        return <></>
-    }
-  }
-
+type Props = { position: Position; toast: Toast }
+function View({ position, toast }: Props): JSX.Element {
   // Only automatically remove toast if it is not Loading
   if (toast.icon !== "Loading") {
     setTimeout(() => {
@@ -37,11 +21,24 @@ const View: React.FC<{
         className={styles.wrapper}
         onClick={() => emit(removeToast(toast))}
       >
-        {icon()}
+        <IconView toast={toast} />
         <div className={styles.text}>{toast.text}</div>
       </div>
     </div>
   )
+}
+type IconProps = { toast: Toast }
+function IconView({ toast }: IconProps): JSX.Element {
+  switch (toast.icon) {
+    case "Success":
+      return <Svg.Alert.Success />
+    case "Error":
+      return <Svg.Alert.Error />
+    case "Loading":
+      return <Svg.Alert.Loading className={styles.loading} />
+    case "None":
+      return <></>
+  }
 }
 
 const styles = {
